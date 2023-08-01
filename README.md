@@ -42,7 +42,7 @@ We will use Google Composer with Airflow to create a DAG for writing and managin
  Create python file![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/5986b852-606d-4337-905e-009b04b0545b)
  
 
- 8. Begin the Python file by importing modules that used in this task.
+ 8. Begin the Python file by `import` modules that used in this task.
  ```
 #Import to use the function of the workshop.
 
@@ -55,7 +55,7 @@ import pandas as pd
 import requests
 import os
 ```
- 9. Set the variables used in this workshop
+ 9. Set the `variables` used in this workshop
   ```
 MYSQL_CONNECTION = "mysql_default"  # The name of the connection set in Airflow.
 CONVERSION_RATE_URL = os.getenv("CONVERSION_RATE_URL") # Api link
@@ -66,7 +66,7 @@ mysql_output_path = "/home/airflow/gcs/data/audible_data_merged.csv"
 conversion_rate_output_path = "/home/airflow/gcs/data/conversion_rate.csv"
 final_output_path = "/home/airflow/gcs/data/output.csv"
 ```
- 10. Begin by building the first function to query data from two MySQL tables and convert them into DataFrames. Next, use pandas merge a left merge using the merge function to combine the entire data from the left DataFrame with the matching data from the right DataFrame. Lastly, convert the merged data into a CSV file
+ 10. Begin by building the first function to query data from two `MySQL` tables and convert them into DataFrames. Next, use `pandas merge` a left merge using the merge function to combine the entire data from the left DataFrame with the matching data from the right DataFrame. Lastly, `convert` the merged data into a CSV file
   ```
 def  get_data_from_mysql(transaction_path):
 #Use MySqlHook to connect to MySQL using the connection set up in Airflow.
@@ -84,7 +84,7 @@ df = audible_transaction.merge(audible_data, how="left", left_on="book_id", righ
 df.to_csv(transaction_path, index=False)
 print(f"Output to {transaction_path}")
 ```
- 11. Create the second function named 'get_conversion_rate.' This function will pull data from a REST API using the 'requests' library, convert it to a JSON format, and then transform it into a pandas DataFrame for easy data cleaning. Next, change the index, which is currently based on dates, to a new column named 'date,' and finally save the DataFrame as a CSV file.
+ 11. Create the second function named `get_conversion_rate` . This function will pull data from a REST API using the `requests` library, convert it to a `JSON format`, and then transform it into a pandas `DataFrame` for easy data cleaning. Next, change the index, which is currently based on dates, to a new column named 'date,' and finally save the DataFrame as a CSV file.
   ```
 def  get_conversion_rate(conversion_rate_path):
 r = requests.get(CONVERSION_RATE_URL)
@@ -96,3 +96,46 @@ df = df.reset_index().rename(columns={"index": "date"})
 df.to_csv(conversion_rate_path, index=False)
 print(f"Output to {conversion_rate_path}")
 ```
+ 12. Create the final function that performs pandas merge on the data and then cleans the data. I will explain the steps by step because it too many commands to explain in this.
+  ```
+def  merge_data(transaction_path, conversion_rate_path, output_path):
+
+#Read from the file and observe that it uses the path received as a parameter.
+transaction = pd.read_csv(transaction_path)
+conversion_rate = pd.read_csv(conversion_rate_path)
+
+transaction['date'] = transaction['timestamp']
+transaction['date'] = pd.to_datetime(transaction['date']).dt.date
+conversion_rate['date'] = pd.to_datetime(conversion_rate['date']).dt.date
+
+  
+
+#merge 2 DataFrame
+final_df = transaction.merge(conversion_rate, how="left", left_on="date", right_on="date")
+
+#Convert the price by removing the '$' symbol and converting it to a float.
+final_df["Price"] = final_df.apply(lambda  x: x["Price"].replace("$",""), axis=1)
+final_df["Price"] = final_df["Price"].astype(float)
+
+ 
+final_df["THBPrice"] = final_df["Price"] * final_df["conversion_rate"]
+final_df = final_df.drop(["date", "book_id"], axis=1)
+
+#save file CSV
+final_df.to_csv(output_path, index=False)
+print(f"Output to {output_path}")
+```
+Start by using pandas `read_csv` to read the file from the provided path
+ ```
+
+#Read from the file and observe that it uses the path received as a parameter.
+transaction = pd.read_csv(transaction_path)
+conversion_rate = pd.read_csv(conversion_rate_path)
+
+```
+In this section, copy the  `timestamp` column by creating a new column named `date` from the `transaction` data. Then, convert the 'data' column to date type and also convert the 'conversion_rate' column to `date type`
+```
+
+transaction['date'] = transaction['timestamp']
+transaction['date'] = pd.to_datetime(transaction['date']).dt.date
+conversion_rate['date'] = pd.to_datetime(conversion_rate['date']).dt.date
