@@ -20,4 +20,4 @@ We will be using Airflow to orchestrate the following tasks:
 8. Send the data to Google BigQuery (data warehouse) for data analysts and data scientists to leverage the data for business insights.
 9. Automate data processes using Airflow. 
 
-![Airflow](https://ibb.co/wY8dPgK) 
+![Capture](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/6f26e6e4-61ff-4b15-ad1e-ebcf956278c1)
