@@ -1,3 +1,4 @@
+
 # Workshop-data-engineer
 
 Practicing a workshop based on what I've learned from my classes
@@ -31,4 +32,26 @@ We will use Google Composer with Airflow to create a DAG for writing and managin
 	 In this case installs`pymysql` ,`requests` ,`pandas` 
 
 	![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/12f319f9-492d-4ce1-93a6-c0fd6c3b2e58)
- 6. Click on the `Cloud Shell` on the right side => Editor to create dag.py for the task execution.![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/20987a1e-22a6-4b93-8c5a-c0c27b823e2f)
+
+ 5. Click on the`Airflow webserver` , then click on `Admin`, and finally select `Connections`.
+ ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/e62c72e0-5ee6-48cb-8f5d-da9fe683aff0)
+ 
+ 6. Find mysql_default and set connection (credential)
+ ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/54096dba-6034-4a34-b8a8-b44b970bc226)
+ 7. Click on the `Cloud Shell` on the right side => Editor to create dag.py for the task execution.![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/20987a1e-22a6-4b93-8c5a-c0c27b823e2f) 
+ Create python file![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/5986b852-606d-4337-905e-009b04b0545b)
+ 
+
+ 8. Begin the Python file by importing modules that used in this task.
+ ```
+#Import to use the function of the workshop.
+
+from airflow.models import DAG
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.mysql.hooks.mysql import MySqlHook
+from airflow.utils.dates import days_ago
+import pandas as pd
+import requests
+import os
+```
