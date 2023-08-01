@@ -55,3 +55,44 @@ import pandas as pd
 import requests
 import os
 ```
+ 9. Set the variables used in this workshop
+  ```
+MYSQL_CONNECTION = "mysql_default"  # The name of the connection set in Airflow.
+CONVERSION_RATE_URL = os.getenv("CONVERSION_RATE_URL") # Api link
+
+#ALL path (set variable to store the file path and give a name to the destination file.)
+#this path is default of data in google cloud(data lake),difference in the filename that I set.
+mysql_output_path = "/home/airflow/gcs/data/audible_data_merged.csv"
+conversion_rate_output_path = "/home/airflow/gcs/data/conversion_rate.csv"
+final_output_path = "/home/airflow/gcs/data/output.csv"
+```
+ 10. Begin by building the first function to query data from two MySQL tables and convert them into DataFrames. Next, use pandas merge a left merge using the merge function to combine the entire data from the left DataFrame with the matching data from the right DataFrame. Lastly, convert the merged data into a CSV file
+  ```
+def  get_data_from_mysql(transaction_path):
+#Use MySqlHook to connect to MySQL using the connection set up in Airflow.
+mysqlserver = MySqlHook(MYSQL_CONNECTION)
+
+#Query data from the database using MySqlHook, and the output will be a pandas DataFrame.
+audible_data = mysqlserver.get_pandas_df(sql="SELECT * FROM audible_data")
+audible_transaction = mysqlserver.get_pandas_df(sql="SELECT * FROM audible_transaction")
+
+#Merge data From 2 DataFrame
+df = audible_transaction.merge(audible_data, how="left", left_on="book_id", right_on="Book_ID")
+
+#Save File CSV to transaction_path ("/home/airflow/gcs/data/audible_data_merged.csv")
+#It will be automatically sent to Google Cloud Storage (GCS)
+df.to_csv(transaction_path, index=False)
+print(f"Output to {transaction_path}")
+```
+ 11. Create the second function named 'get_conversion_rate.' This function will pull data from a REST API using the 'requests' library, convert it to a JSON format, and then transform it into a pandas DataFrame for easy data cleaning. Next, change the index, which is currently based on dates, to a new column named 'date,' and finally save the DataFrame as a CSV file.
+  ```
+def  get_conversion_rate(conversion_rate_path):
+r = requests.get(CONVERSION_RATE_URL)
+result_conversion_rate = r.json()
+df = pd.DataFrame(result_conversion_rate)
+
+#Change the index, which is currently set as dates, to a new column named 'date,' and then save the DataFrame as a CSV file.
+df = df.reset_index().rename(columns={"index": "date"})
+df.to_csv(conversion_rate_path, index=False)
+print(f"Output to {conversion_rate_path}")
+```
