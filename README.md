@@ -139,3 +139,16 @@ In this section, copy the  `timestamp` column by creating a new column named `da
 transaction['date'] = transaction['timestamp']
 transaction['date'] = pd.to_datetime(transaction['date']).dt.date
 conversion_rate['date'] = pd.to_datetime(conversion_rate['date']).dt.date
+
+```
+The transaction DataFrame is `merged`with the conversion_rate DataFrame using a left merge. Within the 'Price' column, there are dollar signs ('$') represented as strings with `lambda`function. To use the data effectively, these symbols need to be removed, and the column should be converted to a float data type and then `change type` the string to floats.
+```
+
+# merge 2 DataFrame
+final_df = transaction.merge(conversion_rate, how="left", left_on="date", right_on="date")
+
+# Convert the price by removing the '$' symbol and converting it to a float.
+final_df["Price"] = final_df.apply(lambda  x: x["Price"].replace("$",""), axis=1)
+final_df["Price"] = final_df["Price"].astype(float)
+The transaction DataFrame is `merged`with the conversion_rate DataFrame using a left merge. Within the 'Price' column, there are dollar signs ('$') represented as strings with `lambda`function. To use the data effectively, these symbols need to be removed, and the column should be converted to a float data type and then `change type` the string to floats.
+```
