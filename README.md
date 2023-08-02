@@ -217,3 +217,6 @@ bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_dat
 ```
 [t1, t2] >> t3 >> t4
 ```
+20. Move the DAG file to Cloud Shell, then navigate to the Airflow DAG directory With the command `gsutil cp (location dag) (destination path)` in cloudshell
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/ccf51b4d-a0b8-4f25-a7aa-5e31224f4763)
+21. Let run this dag
