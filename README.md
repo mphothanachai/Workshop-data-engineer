@@ -152,3 +152,48 @@ final_df["Price"] = final_df.apply(lambda  x: x["Price"].replace("$",""), axis=1
 final_df["Price"] = final_df["Price"].astype(float)
 The transaction DataFrame is `merged`with the conversion_rate DataFrame using a left merge. Within the 'Price' column, there are dollar signs ('$') represented as strings with `lambda`function. To use the data effectively, these symbols need to be removed, and the column should be converted to a float data type and then `change type` the string to floats.
 ```
+
+
+Multiply the 'price' column by the 'conversion_rate' column. Then, create a new column named 'THBPrice' and `drop `drop the 'date' and 'book_id' columns as they are not used. Finally, convert the DataFrame to a `CSV`file.
+```
+final_df["THBPrice"] = final_df["Price"] * final_df["conversion_rate"]
+final_df = final_df.drop(["date", "book_id"], axis=1)
+
+
+# save file CSV
+final_df.to_csv(output_path, index=False)
+print(f"Output to {output_path}")
+```
+
+ 13. Create Default Arguments to define the DAG's workflow as follows
+```
+with DAG(
+"air_flow_DAG", #name of dag
+start_date=days_ago(1),#Set the start date of the DAG's to yesterday.
+schedule_interval="@daily",#run this dag with daily
+tags=["airflow"]
+) as dag:
+```
+ 14. Create tasks to use functions and assign tasks.
+```
+  
+#Use PythonOperator for use Python code and call the function (get_data_from_mysql). Apply kwargs (Keyword Argument) to provide the value for the mysql_output_path variable
+t1 = PythonOperator(
+task_id="get_data_from_mysql",
+python_callable=get_data_from_mysql,
+op_kwargs={"transaction_path": mysql_output_path},
+)
+#Use PythonOperator for use Python code and call the function (get_conversion_rate). Apply kwargs (Keyword Argument) to provide the value for the conversion_rate_output_path variable
+t2 = PythonOperator(
+task_id="get_conversion_rate",
+python_callable=get_conversion_rate,
+op_kwargs={"conversion_rate_path": conversion_rate_output_path},
+)
+
+t3 = PythonOperator(
+task_id="merge_data",
+python_callable=merge_data,
+op_kwargs={"transaction_path": mysql_output_path,
+"conversion_rate_path": conversion_rate_output_path,
+"output_path": final_output_path},
+)
