@@ -197,3 +197,23 @@ op_kwargs={"transaction_path": mysql_output_path,
 "conversion_rate_path": conversion_rate_output_path,
 "output_path": final_output_path},
 )
+```
+ 15. Prepare data warehouse with create data warehouse for push data to bigquery and create data set
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/0f46362a-38eb-41a6-abc6-c676b27d5312)
+ 16. Create dataset should use same region with airflow If the data doesn't match region, data can't push.
+ 
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/a1a5c353-1115-4894-82a4-31266c941c35)
+ 17. Create data table from dataset in this case table name audible_data
+ ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/7d603aa8-886f-4080-bed0-8d9a68d669d5)
+ 18. In this task, a bash command is created to execute the following command `bq command` for push to bigquery you can learn from this [BQ  command](https://cloud.google.com/bigquery/docs/bq-command-line-tool) to run the bash command, you will use a BigQuery command to push a CSV file into storage (with autodetect for automatic schema detection). Specify the path, which always begins with 'gs://' for Google Cloud bucket.
+```
+# Create task 't4' using BashOperator to work with BigQuery for running a bash command.
+t4 = BashOperator(
+task_id="load_to_bq",
+bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_data gs://asia-southeast1-airflow-bd6f87c8-bucket/data/output.csv"
+)
+```
+19. Setting up Dependencies for Determine the order in which tasks should be executed.
+```
+[t1, t2] >> t3 >> t4
+```
