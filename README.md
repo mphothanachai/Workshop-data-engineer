@@ -220,3 +220,7 @@ bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_dat
 20. Move the DAG file to Cloud Shell, then navigate to the Airflow DAG directory With the command `gsutil cp (location dag) (destination path)` in cloudshell
 ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/ccf51b4d-a0b8-4f25-a7aa-5e31224f4763)
 21. Let run this dag
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/5480eed3-ed7a-4b82-91fe-38bdb9b929b3)
+22. The run was successful
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/01e92b61-50e8-4d4d-a806-7afd6950108f)
+## 4. Docker (Airflow)
