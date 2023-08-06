@@ -5,7 +5,7 @@ Practicing a workshop based on what I've learned from my classes
 
 ## 1.Introduction
 I have data on the number of book purchases, book types, and book prices in each country. I want to use it to analyze opportunities and generate business profits.
-##  2.Objective
+## 2.Objective
 For create opportunities and business profits.
 ## 3. Design
 We will be using Airflow to orchestrate the following tasks:
@@ -222,7 +222,7 @@ bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_dat
 ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/5480eed3-ed7a-4b82-91fe-38bdb9b929b3)
 22. The run was successful
 ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/01e92b61-50e8-4d4d-a806-7afd6950108f)
-## Docker(Airflow)
+## 4.Docker(Airflow)
  1. First of all, download [Docker](https://www.docker.com/products/docker-desktop/).
  2. Go to Visual Studio Code and open bash terminal 
 ![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/0abb405b-5e82-458b-be2e-26b2bac7425c)
