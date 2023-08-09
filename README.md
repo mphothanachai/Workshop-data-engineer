@@ -332,7 +332,7 @@ connection  =  pymysql.connect(host=Config.MYSQL_HOST,
   
 
 def  get_data_from_api():
-	url  =  "https://de-training-2020-7au6fmnprq-de.a.run.app/currency_gbp/all"
+	url  =  " "
 	response  =  requests.get(url)
 	result_conversion_rate  =  response.json()
 	conversion_rate  =  pd.DataFrame.from_dict(result_conversion_rate)
