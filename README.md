@@ -454,3 +454,85 @@ connection  =  pymysql.connect(host=Config.MYSQL_HOST,
 	retail['InvoiceDate'] =  pd.to_datetime(retail['InvoiceDate']).dt.date
 	retail.to_csv("/home/airflow/data/retail_from_db.csv", index=False)
 ```
+14. Fetch an API using 'import requests', then convert the response into JSON format. Next, convert the JSON data from a dictionary into a pandas DataFrame, and reset the index. Rename the index column to 'date' and change its data type to 'date'. Finally, save the DataFrame to a CSV file
+```
+def  get_data_from_api():
+	url  =  " "
+	response  =  requests.get(url)
+	result_conversion_rate  =  response.json()
+	conversion_rate  =  pd.DataFrame.from_dict(result_conversion_rate)
+	conversion_rate  =  conversion_rate.reset_index().rename(columns={"index":"date"})
+	conversion_rate['date'] =  pd.to_datetime(conversion_rate['date']).dt.date
+	conversion_rate.to_csv("/home/airflow/data/conversion_rate_from_api.csv", index=False)
+```
+15. Read data from two CSV files located at paths using pandas. Use  left merge on the dataframes, and then use lambda function to multiply the 'unitprice' column by the 'rate' column, creating a new column named 'THBbath'. Finally, convert the resulting dataframe to a CSV file
+```
+def  convert_to_thb():
+	retail  =  pd.read_csv("/home/airflow/data/retail_from_db.csv")
+	conversion_rate  =  pd.read_csv("/home/airflow/data/conversion_rate_from_api.csv")
+	final_df  =  retail.merge(conversion_rate, how="left", left_on="InvoiceDate", right_on="date")
+	final_df['THBPrice'] =  final_df.apply(lambda  x: x['UnitPrice'] *  x['Rate'], axis=1)
+	final_df.to_csv("/home/airflow/data/result.csv", index=False)
+```
+16. default_args are variables that store default values for parameters used when creating tasks and DAGs. "DAG"  represents a workflow or process with a defined sequence of tasks
+```
+
+# Default Args
+
+default_args  = {
+	'owner': 'dag',
+	'depends_on_past': False,
+	'catchup': False,
+	'start_date': days_ago(0),
+	'email': ['airflow@example.com'],
+	'email_on_failure': False,
+	'email_on_retry': False,
+	'retries': 1,
+	'retry_delay': timedelta(minutes=5),
+}
+
+  
+
+# Create DAG
+
+  
+
+dag  = DAG(
+	'Dag',
+	default_args=default_args,
+	description='Pipeline for ETL',
+	schedule_interval=timedelta(days=1),
+)
+```
+17.  Create task for use function to create pipeline.
+```
+# Tasks
+
+  
+
+t1  = PythonOperator(
+	task_id='get_data_from_mysql',
+	python_callable=get_data_from_db,
+	dag=dag,
+)
+  
+t2  = PythonOperator(
+	task_id='get_api',
+	python_callable=get_data_from_api,
+	dag=dag,
+)
+
+  
+
+t3  = PythonOperator(
+	task_id='convert_currency',
+	python_callable=convert_to_thb,
+	dag=dag,
+)
+```
+18. To push files in Google Cloud Storage (data lake) and BigQuery (data warehouse), you need to install Google Cloud SDK to use commands like gsutil and bq . Open a PowerShell terminal and run the following PowerShell commands
+```
+(New-Object  Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe",  "$env:Temp\GoogleCloudSDKInstaller.exe")  
+  
+& $env:Temp\GoogleCloudSDKInstaller.exe
+```
