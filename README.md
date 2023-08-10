@@ -570,4 +570,6 @@ load_to_bq_task = BashOperator(
 )
 ```
 22. Setting up Dependencies for Determine the order in which tasks should be executed.
+```
 [ t1, t2 ] >> t3 >> upload_to_gcs >> load_to_bq
+```
