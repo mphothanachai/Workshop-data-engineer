@@ -4,6 +4,8 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
+from google.cloud import storage
+from google.cloud import bigquery
 
 import pymysql.cursors
 import pandas as pd
@@ -65,10 +67,16 @@ def convert_to_thb():
     final_df['THBPrice'] = final_df.apply(lambda x: x['UnitPrice'] * x['Rate'], axis=1)
     final_df.to_csv("/home/airflow/data/result.csv", index=False)
 
+def upload_to_gcs():
+   client = storage.Client()
+   bucket = client.get_bucket('your_bucket_name')
+   blob = bucket.blob('destination file name')
+   blob.upload_from_filename('/home/airflow/data/result.csv')
+
 # Default Args
 
 default_args = {
-    'owner': 'datath',
+    'owner': 'dag',
     'depends_on_past': False,
     'catchup': False,
     'start_date': days_ago(0),
@@ -107,8 +115,18 @@ t3 = PythonOperator(
     python_callable=convert_to_thb,
     dag=dag,
 )
+upload_task = PythonOperator(
+   task_id='upload_to_gcs',
+   python_callable=upload_to_gcs,
+   dag=dag
+)
 
+load_to_bq_task = BashOperator(
+   task_id="load_to_bq",
+   bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_data gs://location on google cloud/result.csv",
+   dag=dag,
+)
 
 # Dependencies
 
-[t1, t2] >> t3
+[t1, t2] >> t3 >> upload_to_gcs >> load_to_bq
