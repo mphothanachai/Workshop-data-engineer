@@ -536,3 +536,38 @@ t3  = PythonOperator(
   
 & $env:Temp\GoogleCloudSDKInstaller.exe
 ```
+19. install => login => select project => u can use gsutil and bq on google cloud sdk terminal 
+![image](https://github.com/mphothanachai/Workshop-data-engineer-/assets/137395742/e5bdd259-a49b-439a-b442-b7c49891dd0e)
+20. Use import storage for push file result to google cloud (data lake) call with PythonOperator
+
+ ```
+#add more
+from google.cloud import storage
+
+def upload_to_gcs():
+    client = storage.Client()
+    bucket = client.get_bucket('your_bucket_name')
+    blob = bucket.blob('destination file name')
+    blob.upload_from_filename('/home/airflow/data/result.csv')
+
+dag = DAG('example_dag', schedule_interval=None)
+
+upload_task = PythonOperator(
+    task_id='upload_to_gcs',
+    python_callable=upload_to_gcs,
+    dag=dag
+)
+
+```
+21. Next push file to Bigquery (data warehouse) with bq command 
+ ```
+from google.cloud import bigquery
+
+load_to_bq_task = BashOperator(
+    task_id="load_to_bq",
+    bash_command="bq load --source_format=CSV --autodetect datawarehouse.audible_data gs://location on google cloud/result.csv",
+    dag=dag,
+)
+```
+22. Setting up Dependencies for Determine the order in which tasks should be executed.
+[ t1, t2 ] >> t3 >> upload_to_gcs >> load_to_bq
